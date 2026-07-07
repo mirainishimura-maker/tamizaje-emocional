@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cuestionario de estado emocional — PHQ-9 y GAD-7</title>
+<style>
+  :root{
+    color-scheme:light;
+    --bg:#f4f6f8; --card:#fff; --tinta:#22303c; --tenue:#5b6b78;
+    --linea:#e1e7ec; --acento:#3a7d7b; --acento2:#2b5f5d;
+    --ok:#2e7d5b; --leve:#7a8b1f; --mod:#c88a1a; --alto:#c0562f; --grave:#b0332c;
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--tinta); line-height:1.5;
+    margin:0; padding:0 14px 60px;
+  }
+  .wrap{max-width:720px; margin:0 auto}
+  header{padding:26px 4px 10px}
+  h1{font-size:1.35rem; margin:0 0 6px}
+  .sub{color:var(--tenue); font-size:.95rem; margin:0}
+  .card{background:var(--card); border:1px solid var(--linea); border-radius:14px;
+        padding:18px; margin:16px 0; box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .datos{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .datos label{display:block; font-size:.85rem; color:var(--tenue); margin-bottom:4px}
+  .datos input{width:100%; padding:9px 10px; border:1px solid var(--linea);
+        border-radius:8px; font-size:1rem; font-family:inherit}
+  .seccion-tit{font-size:1.1rem; margin:0 0 2px}
+  .instr{background:#eaf3f2; border-left:4px solid var(--acento); padding:10px 14px;
+        border-radius:8px; color:var(--acento2); font-size:.92rem; margin:10px 0 6px}
+  .q{padding:14px 0; border-top:1px solid var(--linea)}
+  .q:first-of-type{border-top:none}
+  .q-txt{font-weight:600; margin:0 0 10px; font-size:.98rem}
+  .q-txt .n{color:var(--acento); margin-right:6px}
+  .opts{display:grid; gap:7px}
+  .opt{display:flex; align-items:center; gap:10px; padding:9px 12px;
+        border:1px solid var(--linea); border-radius:9px; cursor:pointer;
+        font-size:.93rem; transition:.12s}
+  .opt:hover{border-color:var(--acento)}
+  .opt input{accent-color:var(--acento); width:18px; height:18px; flex:none}
+  .opt.sel{background:#eaf3f2; border-color:var(--acento)}
+  .q.falta{background:#fdf1ef; border-radius:10px; padding:12px}
+  .btn{background:var(--acento); color:#fff; border:none; border-radius:10px;
+        padding:13px 20px; font-size:1rem; font-weight:600; cursor:pointer; font-family:inherit}
+  .btn:hover{background:var(--acento2)}
+  .btn.sec{background:#fff; color:var(--acento2); border:1.5px solid var(--acento)}
+  .acciones{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
+  /* resultados */
+  #resultados{display:none}
+  .score-row{display:flex; align-items:center; justify-content:space-between;
+        gap:12px; padding:12px 0; border-bottom:1px solid var(--linea)}
+  .score-row:last-child{border-bottom:none}
+  .score-num{font-size:1.6rem; font-weight:700}
+  .pill{padding:4px 12px; border-radius:999px; color:#fff; font-size:.85rem; font-weight:600}
+  .barra{height:8px; border-radius:6px; background:var(--linea); overflow:hidden; margin-top:6px}
+  .barra > i{display:block; height:100%}
+  .flag{background:#fdecea; border:1px solid #f3b9b3; border-radius:10px;
+        padding:12px 14px; margin-top:12px; color:#8a2b23; font-size:.92rem}
+  textarea{width:100%; min-height:220px; margin-top:12px; padding:12px;
+        border:1px solid var(--linea); border-radius:10px; font-family:ui-monospace,Consolas,monospace;
+        font-size:.85rem; line-height:1.45; white-space:pre; overflow:auto}
+  .foot{color:var(--tenue); font-size:.8rem; margin-top:20px; text-align:center}
+  @media (max-width:520px){ .datos{grid-template-columns:1fr} }
+  @media print{
+    .noprint{display:none!important}
+    body{background:#fff}
+    .card{box-shadow:none; break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <h1>Cuestionario de estado emocional</h1>
+  <p class="sub">Tamizaje breve — PHQ-9 (ánimo) y GAD-7 (ansiedad). Toma unos 5 minutos.</p>
+</header>
+
+<div class="card">
+  <div class="datos">
+    <div><label>Nombre y apellidos</label><input id="nombre" placeholder="Nombre de la paciente"></div>
+    <div><label>Fecha</label><input id="fecha" type="date"></div>
+  </div>
+</div>
+
+<!-- ================= PHQ-9 ================= -->
+<div class="card">
+  <h2 class="seccion-tit">Parte 1 — Estado de ánimo</h2>
+  <div class="instr">Durante las <b>últimas 2 semanas</b>, ¿con qué frecuencia le han molestado los siguientes problemas?</div>
+  <div id="phq"></div>
+
+  <div class="q" style="border-top:2px solid var(--linea)">
+    <p class="q-txt">Si marcó alguno de los problemas anteriores, ¿qué tanta dificultad le han causado para trabajar/estudiar, ocuparse de las cosas del hogar o relacionarse con los demás?</p>
+    <div class="opts" data-func>
+      <label class="opt"><input type="radio" name="func" value="0"><span>No ha sido difícil</span></label>
+      <label class="opt"><input type="radio" name="func" value="1"><span>Un poco difícil</span></label>
+      <label class="opt"><input type="radio" name="func" value="2"><span>Muy difícil</span></label>
+      <label class="opt"><input type="radio" name="func" value="3"><span>Extremadamente difícil</span></label>
+    </div>
+  </div>
+</div>
+
+<!-- ================= GAD-7 ================= -->
+<div class="card">
+  <h2 class="seccion-tit">Parte 2 — Ansiedad</h2>
+  <div class="instr">Durante las <b>últimas 2 semanas</b>, ¿con qué frecuencia ha tenido molestias debido a los siguientes problemas?</div>
+  <div id="gad"></div>
+</div>
+
+<!-- ================= Observaciones ================= -->
+<div class="card">
+  <label style="font-size:.85rem;color:var(--tenue)">Si quieres, cuéntanos algo más sobre cómo te has sentido (opcional)</label>
+  <textarea id="obs" style="min-height:90px;white-space:normal;font-family:inherit;font-size:1rem" placeholder="Espacio libre para la paciente..."></textarea>
+</div>
+
+<div class="acciones noprint">
+  <button class="btn" onclick="calcular()">Ver resultados</button>
+</div>
+
+<!-- ================= RESULTADOS ================= -->
+<div class="card" id="resultados">
+  <h2 class="seccion-tit">Resultados</h2>
+  <p class="sub" style="margin:2px 0 14px">Instrumentos de tamizaje — no constituyen un diagnóstico por sí solos; requieren la valoración del profesional.</p>
+
+  <div class="score-row">
+    <div>
+      <div style="font-weight:600">PHQ-9 · Depresión</div>
+      <div class="barra"><i id="bar-phq"></i></div>
+    </div>
+    <div style="text-align:right">
+      <div class="score-num" id="num-phq">–</div>
+      <span class="pill" id="pill-phq">—</span>
+    </div>
+  </div>
+
+  <div class="score-row">
+    <div>
+      <div style="font-weight:600">GAD-7 · Ansiedad</div>
+      <div class="barra"><i id="bar-gad"></i></div>
+    </div>
+    <div style="text-align:right">
+      <div class="score-num" id="num-gad">–</div>
+      <span class="pill" id="pill-gad">—</span>
+    </div>
+  </div>
+
+  <div id="flag" class="flag" style="display:none"></div>
+
+  <h3 style="margin:20px 0 4px;font-size:1rem">Bloque para el informe</h3>
+  <p class="sub" style="margin:0">Copia este texto y pégalo en el informe psicológico.</p>
+  <textarea id="salida" readonly></textarea>
+  <div class="acciones noprint">
+    <button class="btn" onclick="copiar()">Copiar texto</button>
+    <button class="btn sec" onclick="window.print()">Imprimir / Guardar PDF</button>
+  </div>
+</div>
+
+<p class="foot">PHQ-9 y GAD-7 — instrumentos de dominio público (Spitzer, Kroenke, Williams). Uso clínico.</p>
+</div>
+
+<script>
+const PHQ = [
+ "Poco interés o placer en hacer las cosas",
+ "Se ha sentido decaído(a), deprimido(a) o sin esperanza",
+ "Ha tenido problemas para dormir, para permanecer dormido(a) o ha dormido demasiado",
+ "Se ha sentido cansado(a) o con poca energía",
+ "Ha tenido poco apetito o ha comido en exceso",
+ "Se ha sentido mal consigo mismo(a), o que es un fracaso, o que se ha fallado a sí mismo(a) o a su familia",
+ "Ha tenido dificultad para concentrarse (leer, ver televisión, estudiar)",
+ "Se ha movido o hablado tan despacio que otras personas lo han notado; o al contrario, ha estado tan inquieto(a) que se ha movido mucho más de lo habitual",
+ "Ha tenido pensamientos de que estaría mejor muerto(a) o de hacerse daño de alguna manera"
+];
+const GAD = [
+ "Se ha sentido nervioso(a), ansioso(a) o con los nervios de punta",
+ "No ha podido dejar de preocuparse o no ha podido controlar la preocupación",
+ "Se ha preocupado demasiado por diferentes cosas",
+ "Ha tenido dificultad para relajarse",
+ "Ha estado tan inquieto(a) que le cuesta permanecer sentado(a) con tranquilidad",
+ "Se ha molestado o irritado con facilidad",
+ "Ha sentido miedo, como si algo terrible fuera a pasar"
+];
+const OPC = ["Ningún día","Varios días","Más de la mitad de los días","Casi todos los días"];
+
+function pinta(cont, prefijo, items){
+  const box = document.getElementById(cont);
+  items.forEach((t,i)=>{
+    const opts = OPC.map((o,v)=>
+      `<label class="opt"><input type="radio" name="${prefijo}${i}" value="${v}"><span>${o}</span></label>`).join("");
+    box.insertAdjacentHTML("beforeend",
+      `<div class="q" id="q-${prefijo}${i}">
+         <p class="q-txt"><span class="n">${i+1}.</span>${t}</p>
+         <div class="opts">${opts}</div>
+       </div>`);
+  });
+}
+pinta("phq","p",PHQ);
+pinta("gad","g",GAD);
+
+// resaltar opción elegida
+document.addEventListener("change", e=>{
+  if(e.target.type==="radio"){
+    e.target.closest(".opts").querySelectorAll(".opt").forEach(l=>l.classList.remove("sel"));
+    e.target.closest(".opt").classList.add("sel");
+    const q=e.target.closest(".q"); if(q) q.classList.remove("falta");
+  }
+});
+
+function suma(prefijo,n){
+  let total=0, faltan=[];
+  for(let i=0;i<n;i++){
+    const sel=document.querySelector(`input[name="${prefijo}${i}"]:checked`);
+    if(sel) total+=parseInt(sel.value); else faltan.push(`${prefijo}${i}`);
+  }
+  return {total,faltan};
+}
+
+function nivelPHQ(s){
+  if(s<=4) return {t:"Mínima o ausente",c:"var(--ok)",p:s/27};
+  if(s<=9) return {t:"Leve",c:"var(--leve)",p:s/27};
+  if(s<=14) return {t:"Moderada",c:"var(--mod)",p:s/27};
+  if(s<=19) return {t:"Moderadamente grave",c:"var(--alto)",p:s/27};
+  return {t:"Grave",c:"var(--grave)",p:s/27};
+}
+function nivelGAD(s){
+  if(s<=4) return {t:"Mínima",c:"var(--ok)",p:s/21};
+  if(s<=9) return {t:"Leve",c:"var(--leve)",p:s/21};
+  if(s<=14) return {t:"Moderada",c:"var(--mod)",p:s/21};
+  return {t:"Grave",c:"var(--grave)",p:s/21};
+}
+const FUNC=["No ha sido difícil","Un poco difícil","Muy difícil","Extremadamente difícil"];
+
+function calcular(){
+  const p=suma("p",9), g=suma("g",7);
+  const faltan=[...p.faltan,...g.faltan];
+  document.querySelectorAll(".q.falta").forEach(q=>q.classList.remove("falta"));
+  if(faltan.length){
+    faltan.forEach(id=>document.getElementById("q-"+id)?.classList.add("falta"));
+    document.getElementById("q-"+faltan[0])?.scrollIntoView({behavior:"smooth",block:"center"});
+    alert("Faltan "+faltan.length+" pregunta(s) por responder (resaltadas en rosado).");
+    return;
+  }
+  const np=nivelPHQ(p.total), ng=nivelGAD(g.total);
+  const funcSel=document.querySelector('input[name="func"]:checked');
+  const func = funcSel? FUNC[parseInt(funcSel.value)] : "No indicado";
+  const item9=parseInt(document.querySelector('input[name="p8"]:checked').value);
+
+  // panel
+  document.getElementById("num-phq").textContent=p.total+"/27";
+  document.getElementById("num-gad").textContent=g.total+"/21";
+  const pillP=document.getElementById("pill-phq"); pillP.textContent=np.t; pillP.style.background=np.c;
+  const pillG=document.getElementById("pill-gad"); pillG.textContent=ng.t; pillG.style.background=ng.c;
+  const barP=document.getElementById("bar-phq"); barP.style.width=Math.round(np.p*100)+"%"; barP.style.background=np.c;
+  const barG=document.getElementById("bar-gad"); barG.style.width=Math.round(ng.p*100)+"%"; barG.style.background=ng.c;
+
+  const flag=document.getElementById("flag");
+  if(item9>0){
+    flag.style.display="block";
+    flag.innerHTML="<b>Atención clínica:</b> la paciente marcó el ítem 9 (pensamientos de muerte o de hacerse daño). "+
+      "Se recomienda realizar valoración de riesgo suicida. Línea de ayuda en Perú: <b>113, opción 5</b> (salud mental). Emergencias: 106.";
+  } else flag.style.display="none";
+
+  // texto informe
+  const nombre=document.getElementById("nombre").value||"[Nombre de la paciente]";
+  const fecha=document.getElementById("fecha").value||"[fecha]";
+  const obs=document.getElementById("obs").value.trim();
+  let out=
+`INSTRUMENTOS APLICADOS
+- PHQ-9 (Cuestionario de Salud del Paciente): tamizaje de sintomatología depresiva.
+- GAD-7 (Escala de Ansiedad Generalizada): tamizaje de sintomatología ansiosa.
+
+RESULTADOS  (${nombre} — ${fecha})
+- PHQ-9 (depresión): ${p.total}/27  →  severidad ${np.t.toLowerCase()}.
+- GAD-7 (ansiedad): ${g.total}/21  →  severidad ${ng.t.toLowerCase()}.
+- Repercusión funcional referida: ${func}.`;
+  if(item9>0){
+    out+=`\n- Ítem 9 del PHQ-9 (ideación de muerte/autolesión): PRESENTE (puntaje ${item9}). Se realiza/indica valoración de riesgo.`;
+  }
+  out+=`\n\nINTERPRETACIÓN (sugerida — ajústela según criterio clínico)
+Los puntajes obtenidos son compatibles con sintomatología depresiva de intensidad ${np.t.toLowerCase()} y ansiosa de intensidad ${ng.t.toLowerCase()}, con una repercusión funcional referida como "${func.toLowerCase()}". Estos hallazgos, junto con la entrevista y la observación clínica, sustentan la necesidad de acompañamiento psicológico y las consideraciones académicas señaladas en el presente informe.`;
+  if(obs){ out+=`\n\nREFERIDO POR LA PACIENTE (textual)\n"${obs}"`; }
+
+  document.getElementById("salida").value=out;
+  document.getElementById("resultados").style.display="block";
+  document.getElementById("resultados").scrollIntoView({behavior:"smooth"});
+}
+
+function copiar(){
+  const t=document.getElementById("salida");
+  t.select(); t.setSelectionRange(0,99999);
+  navigator.clipboard?.writeText(t.value).then(
+    ()=>alert("Texto copiado. Pégalo en el informe (Ctrl+V)."),
+    ()=>{document.execCommand("copy"); alert("Texto copiado.");}
+  );
+}
+</script>
+
+</body>
+</html>
