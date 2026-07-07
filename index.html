@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cuestionario de estado emocional — PHQ-9 y GAD-7</title>
+<title>Cuestionario de estado emocional — tamizaje</title>
 <style>
   :root{
     color-scheme:light;
@@ -17,8 +17,11 @@
     background:var(--bg); color:var(--tinta); line-height:1.5;
     margin:0; padding:0 14px 60px;
   }
+  .progress{position:sticky; top:0; left:0; height:6px; background:var(--linea);
+        margin:0 -14px 0; z-index:20}
+  .progress > i{display:block; height:100%; width:0; background:var(--acento); transition:width .2s}
   .wrap{max-width:720px; margin:0 auto}
-  header{padding:26px 4px 10px}
+  header{padding:22px 4px 6px}
   h1{font-size:1.35rem; margin:0 0 6px}
   .sub{color:var(--tenue); font-size:.95rem; margin:0}
   .card{background:var(--card); border:1px solid var(--linea); border-radius:14px;
@@ -27,6 +30,9 @@
   .datos label{display:block; font-size:.85rem; color:var(--tenue); margin-bottom:4px}
   .datos input{width:100%; padding:9px 10px; border:1px solid var(--linea);
         border-radius:8px; font-size:1rem; font-family:inherit}
+  .cinta{display:inline-block; background:var(--acento); color:#fff; font-size:.72rem;
+        padding:3px 11px; border-radius:999px; letter-spacing:.4px; margin-bottom:8px;
+        text-transform:uppercase; font-weight:600}
   .seccion-tit{font-size:1.1rem; margin:0 0 2px}
   .instr{background:#eaf3f2; border-left:4px solid var(--acento); padding:10px 14px;
         border-radius:8px; color:var(--acento2); font-size:.92rem; margin:10px 0 6px}
@@ -46,21 +52,22 @@
         padding:13px 20px; font-size:1rem; font-weight:600; cursor:pointer; font-family:inherit}
   .btn:hover{background:var(--acento2)}
   .btn.sec{background:#fff; color:var(--acento2); border:1.5px solid var(--acento)}
-  .acciones{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
-  /* resultados */
+  .acciones{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; align-items:center}
+  .cuenta{color:var(--tenue); font-size:.88rem}
   #resultados{display:none}
   .score-row{display:flex; align-items:center; justify-content:space-between;
         gap:12px; padding:12px 0; border-bottom:1px solid var(--linea)}
   .score-row:last-child{border-bottom:none}
-  .score-num{font-size:1.6rem; font-weight:700}
-  .pill{padding:4px 12px; border-radius:999px; color:#fff; font-size:.85rem; font-weight:600}
-  .barra{height:8px; border-radius:6px; background:var(--linea); overflow:hidden; margin-top:6px}
+  .score-lbl{font-weight:600}
+  .score-num{font-size:1.4rem; font-weight:700}
+  .pill{padding:4px 12px; border-radius:999px; color:#fff; font-size:.82rem; font-weight:600; white-space:nowrap}
+  .barra{height:8px; border-radius:6px; background:var(--linea); overflow:hidden; margin-top:6px; width:180px; max-width:45vw}
   .barra > i{display:block; height:100%}
   .flag{background:#fdecea; border:1px solid #f3b9b3; border-radius:10px;
         padding:12px 14px; margin-top:12px; color:#8a2b23; font-size:.92rem}
-  textarea{width:100%; min-height:220px; margin-top:12px; padding:12px;
+  textarea{width:100%; min-height:260px; margin-top:12px; padding:12px;
         border:1px solid var(--linea); border-radius:10px; font-family:ui-monospace,Consolas,monospace;
-        font-size:.85rem; line-height:1.45; white-space:pre; overflow:auto}
+        font-size:.82rem; line-height:1.45; white-space:pre; overflow:auto}
   .foot{color:var(--tenue); font-size:.8rem; margin-top:20px; text-align:center}
   @media (max-width:520px){ .datos{grid-template-columns:1fr} }
   @media print{
@@ -72,10 +79,11 @@
 </head>
 <body>
 
+<div class="progress"><i id="prog"></i></div>
 <div class="wrap">
 <header>
   <h1>Cuestionario de estado emocional</h1>
-  <p class="sub">Tamizaje breve — PHQ-9 (ánimo) y GAD-7 (ansiedad). Toma unos 5 minutos.</p>
+  <p class="sub">Tamizaje breve del ánimo, la ansiedad, el sueño, el estrés y reacciones a experiencias difíciles. Toma unos 10–12 minutos. Responde con sinceridad; no hay respuestas buenas ni malas.</p>
 </header>
 
 <div class="card">
@@ -85,31 +93,8 @@
   </div>
 </div>
 
-<!-- ================= PHQ-9 ================= -->
-<div class="card">
-  <h2 class="seccion-tit">Parte 1 — Estado de ánimo</h2>
-  <div class="instr">Durante las <b>últimas 2 semanas</b>, ¿con qué frecuencia le han molestado los siguientes problemas?</div>
-  <div id="phq"></div>
+<div id="form"></div>
 
-  <div class="q" style="border-top:2px solid var(--linea)">
-    <p class="q-txt">Si marcó alguno de los problemas anteriores, ¿qué tanta dificultad le han causado para trabajar/estudiar, ocuparse de las cosas del hogar o relacionarse con los demás?</p>
-    <div class="opts" data-func>
-      <label class="opt"><input type="radio" name="func" value="0"><span>No ha sido difícil</span></label>
-      <label class="opt"><input type="radio" name="func" value="1"><span>Un poco difícil</span></label>
-      <label class="opt"><input type="radio" name="func" value="2"><span>Muy difícil</span></label>
-      <label class="opt"><input type="radio" name="func" value="3"><span>Extremadamente difícil</span></label>
-    </div>
-  </div>
-</div>
-
-<!-- ================= GAD-7 ================= -->
-<div class="card">
-  <h2 class="seccion-tit">Parte 2 — Ansiedad</h2>
-  <div class="instr">Durante las <b>últimas 2 semanas</b>, ¿con qué frecuencia ha tenido molestias debido a los siguientes problemas?</div>
-  <div id="gad"></div>
-</div>
-
-<!-- ================= Observaciones ================= -->
 <div class="card">
   <label style="font-size:.85rem;color:var(--tenue)">Si quieres, cuéntanos algo más sobre cómo te has sentido (opcional)</label>
   <textarea id="obs" style="min-height:90px;white-space:normal;font-family:inherit;font-size:1rem" placeholder="Espacio libre para la paciente..."></textarea>
@@ -117,35 +102,13 @@
 
 <div class="acciones noprint">
   <button class="btn" onclick="calcular()">Ver resultados</button>
+  <span class="cuenta" id="cuenta">0 respondidas</span>
 </div>
 
-<!-- ================= RESULTADOS ================= -->
 <div class="card" id="resultados">
   <h2 class="seccion-tit">Resultados</h2>
   <p class="sub" style="margin:2px 0 14px">Instrumentos de tamizaje — no constituyen un diagnóstico por sí solos; requieren la valoración del profesional.</p>
-
-  <div class="score-row">
-    <div>
-      <div style="font-weight:600">PHQ-9 · Depresión</div>
-      <div class="barra"><i id="bar-phq"></i></div>
-    </div>
-    <div style="text-align:right">
-      <div class="score-num" id="num-phq">–</div>
-      <span class="pill" id="pill-phq">—</span>
-    </div>
-  </div>
-
-  <div class="score-row">
-    <div>
-      <div style="font-weight:600">GAD-7 · Ansiedad</div>
-      <div class="barra"><i id="bar-gad"></i></div>
-    </div>
-    <div style="text-align:right">
-      <div class="score-num" id="num-gad">–</div>
-      <span class="pill" id="pill-gad">—</span>
-    </div>
-  </div>
-
+  <div id="rows"></div>
   <div id="flag" class="flag" style="display:none"></div>
 
   <h3 style="margin:20px 0 4px;font-size:1rem">Bloque para el informe</h3>
@@ -157,83 +120,165 @@
   </div>
 </div>
 
-<p class="foot">PHQ-9 y GAD-7 — instrumentos de dominio público (Spitzer, Kroenke, Williams). Uso clínico.</p>
+<p class="foot">PHQ-9, GAD-7, ISI, PSS-10 y PCL-5 — instrumentos de dominio público. Uso clínico.</p>
 </div>
 
 <script>
-const PHQ = [
- "Poco interés o placer en hacer las cosas",
- "Se ha sentido decaído(a), deprimido(a) o sin esperanza",
- "Ha tenido problemas para dormir, para permanecer dormido(a) o ha dormido demasiado",
- "Se ha sentido cansado(a) o con poca energía",
- "Ha tenido poco apetito o ha comido en exceso",
- "Se ha sentido mal consigo mismo(a), o que es un fracaso, o que se ha fallado a sí mismo(a) o a su familia",
- "Ha tenido dificultad para concentrarse (leer, ver televisión, estudiar)",
- "Se ha movido o hablado tan despacio que otras personas lo han notado; o al contrario, ha estado tan inquieto(a) que se ha movido mucho más de lo habitual",
- "Ha tenido pensamientos de que estaría mejor muerto(a) o de hacerse daño de alguna manera"
-];
-const GAD = [
- "Se ha sentido nervioso(a), ansioso(a) o con los nervios de punta",
- "No ha podido dejar de preocuparse o no ha podido controlar la preocupación",
- "Se ha preocupado demasiado por diferentes cosas",
- "Ha tenido dificultad para relajarse",
- "Ha estado tan inquieto(a) que le cuesta permanecer sentado(a) con tranquilidad",
- "Se ha molestado o irritado con facilidad",
- "Ha sentido miedo, como si algo terrible fuera a pasar"
-];
-const OPC = ["Ningún día","Varios días","Más de la mitad de los días","Casi todos los días"];
+// ---------- opciones ----------
+const OPC_FREQ = ["Ningún día","Varios días","Más de la mitad de los días","Casi todos los días"];       // 0-3
+const OPC_PSS  = ["Nunca","Casi nunca","De vez en cuando","A menudo","Muy a menudo"];                      // 0-4
+const OPC_PCL  = ["Nada","Un poco","Moderadamente","Bastante","Extremadamente"];                            // 0-4
+const ISI_SEV  = ["Ninguna","Leve","Moderada","Grave","Muy grave"];
+const ISI_SAT  = ["Muy satisfecho(a)","Satisfecho(a)","Moderadamente satisfecho(a)","Insatisfecho(a)","Muy insatisfecho(a)"];
+const ISI_GRA  = ["Nada","Un poco","Algo","Mucho","Muchísimo"];
 
-function pinta(cont, prefijo, items){
-  const box = document.getElementById(cont);
-  items.forEach((t,i)=>{
-    const opts = OPC.map((o,v)=>
-      `<label class="opt"><input type="radio" name="${prefijo}${i}" value="${v}"><span>${o}</span></label>`).join("");
-    box.insertAdjacentHTML("beforeend",
-      `<div class="q" id="q-${prefijo}${i}">
-         <p class="q-txt"><span class="n">${i+1}.</span>${t}</p>
-         <div class="opts">${opts}</div>
-       </div>`);
-  });
-}
-pinta("phq","p",PHQ);
-pinta("gad","g",GAD);
+// ---------- niveles ----------
+function nvl(t,c,s,max){ return {t:t, c:c, p:s/max}; }
+function nivelPHQ(s){ if(s<=4)return nvl("Mínima o ausente","var(--ok)",s,27); if(s<=9)return nvl("Leve","var(--leve)",s,27); if(s<=14)return nvl("Moderada","var(--mod)",s,27); if(s<=19)return nvl("Moderadamente grave","var(--alto)",s,27); return nvl("Grave","var(--grave)",s,27); }
+function nivelGAD(s){ if(s<=4)return nvl("Mínima","var(--ok)",s,21); if(s<=9)return nvl("Leve","var(--leve)",s,21); if(s<=14)return nvl("Moderada","var(--mod)",s,21); return nvl("Grave","var(--grave)",s,21); }
+function nivelISI(s){ if(s<=7)return nvl("Sin insomnio clínico","var(--ok)",s,28); if(s<=14)return nvl("Insomnio subumbral","var(--leve)",s,28); if(s<=21)return nvl("Insomnio moderado","var(--mod)",s,28); return nvl("Insomnio grave","var(--grave)",s,28); }
+function nivelPSS(s){ if(s<=13)return nvl("Bajo","var(--ok)",s,40); if(s<=26)return nvl("Moderado","var(--mod)",s,40); return nvl("Alto","var(--grave)",s,40); }
+function nivelPCL(s){ if(s<20)return nvl("Mínimo","var(--ok)",s,80); if(s<33)return nvl("Subumbral","var(--mod)",s,80); return nvl("≥ punto de corte","var(--grave)",s,80); }
 
-// resaltar opción elegida
+// ---------- escalas ----------
+const FUNC=["No ha sido difícil","Un poco difícil","Muy difícil","Extremadamente difícil"];
+const funcHTML =
+ `<div class="q" style="border-top:2px solid var(--linea)">
+    <p class="q-txt">Si marcó alguno de los problemas anteriores, ¿qué tanta dificultad le han causado para trabajar/estudiar, ocuparse de las cosas del hogar o relacionarse con los demás?</p>
+    <div class="opts">${FUNC.map((o,v)=>`<label class="opt"><input type="radio" name="func" value="${v}"><span>${o}</span></label>`).join("")}</div>
+  </div>`;
+
+const ESCALAS = [
+ { id:"p", cinta:"Depresión · PHQ-9", tit:"Parte 1 — Estado de ánimo", max:27, banda:nivelPHQ, rep:"PHQ-9 (depresión)", lbl:"PHQ-9 · Ánimo",
+   instr:"Durante las <b>últimas 2 semanas</b>, ¿con qué frecuencia le han molestado los siguientes problemas?",
+   opciones:OPC_FREQ, extra:funcHTML,
+   items:[
+    "Poco interés o placer en hacer las cosas",
+    "Se ha sentido decaído(a), deprimido(a) o sin esperanza",
+    "Ha tenido problemas para dormir, para permanecer dormido(a) o ha dormido demasiado",
+    "Se ha sentido cansado(a) o con poca energía",
+    "Ha tenido poco apetito o ha comido en exceso",
+    "Se ha sentido mal consigo mismo(a), o que es un fracaso, o que se ha fallado a sí mismo(a) o a su familia",
+    "Ha tenido dificultad para concentrarse (leer, ver televisión, estudiar)",
+    "Se ha movido o hablado tan despacio que otras personas lo han notado; o al contrario, ha estado tan inquieto(a) que se ha movido mucho más de lo habitual",
+    "Ha tenido pensamientos de que estaría mejor muerto(a) o de hacerse daño de alguna manera"
+   ]},
+ { id:"g", cinta:"Ansiedad · GAD-7", tit:"Parte 2 — Ansiedad", max:21, banda:nivelGAD, rep:"GAD-7 (ansiedad)", lbl:"GAD-7 · Ansiedad",
+   instr:"Durante las <b>últimas 2 semanas</b>, ¿con qué frecuencia ha tenido molestias debido a los siguientes problemas?",
+   opciones:OPC_FREQ,
+   items:[
+    "Se ha sentido nervioso(a), ansioso(a) o con los nervios de punta",
+    "No ha podido dejar de preocuparse o no ha podido controlar la preocupación",
+    "Se ha preocupado demasiado por diferentes cosas",
+    "Ha tenido dificultad para relajarse",
+    "Ha estado tan inquieto(a) que le cuesta permanecer sentado(a) con tranquilidad",
+    "Se ha molestado o irritado con facilidad",
+    "Ha sentido miedo, como si algo terrible fuera a pasar"
+   ]},
+ { id:"s", cinta:"Sueño · ISI", tit:"Parte 3 — Sueño", max:28, banda:nivelISI, rep:"ISI (insomnio)", lbl:"ISI · Sueño",
+   instr:"Marque la respuesta que mejor describa su sueño <b>durante las últimas 2 semanas</b>.",
+   items:[
+    {t:"Dificultad para quedarse dormido(a)", op:ISI_SEV},
+    {t:"Dificultad para permanecer dormido(a) (se despierta durante la noche)", op:ISI_SEV},
+    {t:"Despertarse demasiado temprano por la mañana", op:ISI_SEV},
+    {t:"¿Qué tan satisfecho(a) está con su sueño actual?", op:ISI_SAT},
+    {t:"¿En qué medida su problema de sueño interfiere con su funcionamiento diario (cansancio, ánimo, concentración, memoria, estudios)?", op:ISI_GRA},
+    {t:"¿Qué tan notorio para los demás cree que es su problema de sueño?", op:ISI_GRA},
+    {t:"¿Qué tan preocupado(a) o angustiado(a) está por su problema de sueño actual?", op:ISI_GRA}
+   ]},
+ { id:"e", cinta:"Estrés · PSS-10", tit:"Parte 4 — Estrés percibido", max:40, banda:nivelPSS, rep:"PSS-10 (estrés percibido)", lbl:"PSS-10 · Estrés",
+   instr:"Indique, <b>en el último mes</b>, con qué frecuencia se ha sentido o ha pensado de cada una de estas maneras.",
+   opciones:OPC_PSS, reverse:[3,4,6,7],
+   items:[
+    "Se ha sentido afectado(a) por algo que ocurrió de forma inesperada.",
+    "Ha sentido que no podía controlar las cosas importantes de su vida.",
+    "Se ha sentido nervioso(a) o estresado(a).",
+    "Se ha sentido seguro(a) de su capacidad para manejar sus problemas personales.",
+    "Ha sentido que las cosas marchaban como usted quería.",
+    "Ha sentido que no podía afrontar todas las cosas que tenía que hacer.",
+    "Ha podido controlar las dificultades o irritaciones de su vida.",
+    "Ha sentido que tenía todo bajo control.",
+    "Se ha sentido enfadado(a) o molesto(a) por cosas que estaban fuera de su control.",
+    "Ha sentido que las dificultades se acumulaban tanto que no podía superarlas."
+   ]},
+ { id:"t", cinta:"Trauma · PCL-5", tit:"Parte 5 — Reacciones a experiencias muy estresantes o traumáticas", max:80, banda:nivelPCL, rep:"PCL-5 (estrés postraumático)", lbl:"PCL-5 · Trauma",
+   instr:"Pensando en la experiencia <b>más estresante o traumática</b> que haya vivido, indique cuánto le ha molestado cada problema <b>en el último mes</b>. Si no ha vivido una experiencia así, marque \"Nada\".",
+   opciones:OPC_PCL,
+   items:[
+    "Recuerdos repetidos, involuntarios y angustiosos de la experiencia",
+    "Sueños angustiosos repetidos relacionados con la experiencia",
+    "Sentir o actuar de repente como si volviera a vivir la experiencia (como un flashback)",
+    "Sentirse muy alterado(a) al recordar la experiencia",
+    "Reacciones físicas intensas al recordar la experiencia (palpitaciones, falta de aire, sudoración)",
+    "Evitar recuerdos, pensamientos o sentimientos relacionados con la experiencia",
+    "Evitar cosas que se lo recuerden (personas, lugares, conversaciones, actividades, objetos o situaciones)",
+    "Dificultad para recordar partes importantes de la experiencia",
+    "Creencias negativas fuertes sobre sí mismo(a), los demás o el mundo",
+    "Culparse a sí mismo(a) o a otros por la experiencia o por lo ocurrido después",
+    "Sentimientos negativos intensos: miedo, horror, enojo, culpa o vergüenza",
+    "Pérdida de interés en actividades que antes disfrutaba",
+    "Sentirse distante o aislado(a) de los demás",
+    "Dificultad para sentir emociones positivas (no poder sentir felicidad o cariño)",
+    "Irritabilidad, arrebatos de ira o comportarse de forma agresiva",
+    "Tomar riesgos o hacer cosas que podrían causarle daño",
+    "Estar \"en guardia\", vigilante o en alerta constante",
+    "Sobresaltarse con facilidad",
+    "Dificultad para concentrarse",
+    "Dificultad para conciliar o mantener el sueño"
+   ]}
+];
+
+// ---------- render ----------
+const cont = document.getElementById("form");
+ESCALAS.forEach(esc=>{
+  const preguntas = esc.items.map((it,i)=>{
+    const txt = (typeof it==="string")? it : it.t;
+    const ops = (typeof it==="object" && it.op)? it.op : esc.opciones;
+    const opts = ops.map((o,v)=>`<label class="opt"><input type="radio" name="${esc.id}${i}" value="${v}"><span>${o}</span></label>`).join("");
+    return `<div class="q" id="q-${esc.id}${i}"><p class="q-txt"><span class="n">${i+1}.</span>${txt}</p><div class="opts">${opts}</div></div>`;
+  }).join("");
+  cont.insertAdjacentHTML("beforeend",
+    `<div class="card"><span class="cinta">${esc.cinta}</span><h2 class="seccion-tit">${esc.tit}</h2><div class="instr">${esc.instr}</div>${preguntas}${esc.extra||""}</div>`);
+});
+
+// total de preguntas (incluye la de repercusión funcional)
+const TOTAL_Q = ESCALAS.reduce((a,e)=>a+e.items.length,0) + 1;
+
 document.addEventListener("change", e=>{
   if(e.target.type==="radio"){
     e.target.closest(".opts").querySelectorAll(".opt").forEach(l=>l.classList.remove("sel"));
     e.target.closest(".opt").classList.add("sel");
     const q=e.target.closest(".q"); if(q) q.classList.remove("falta");
+    actualizarProgreso();
   }
 });
+function grupos(){
+  const g=["func"];
+  ESCALAS.forEach(e=>e.items.forEach((_,i)=>g.push(e.id+i)));
+  return g;
+}
+function actualizarProgreso(){
+  const g=grupos();
+  const hechas=g.filter(n=>document.querySelector(`input[name="${n}"]:checked`)).length;
+  document.getElementById("prog").style.width=Math.round(hechas/TOTAL_Q*100)+"%";
+  document.getElementById("cuenta").textContent=`${hechas} de ${TOTAL_Q} respondidas`;
+}
 
-function suma(prefijo,n){
+function sumaEscala(esc){
   let total=0, faltan=[];
-  for(let i=0;i<n;i++){
-    const sel=document.querySelector(`input[name="${prefijo}${i}"]:checked`);
-    if(sel) total+=parseInt(sel.value); else faltan.push(`${prefijo}${i}`);
-  }
+  esc.items.forEach((_,i)=>{
+    const sel=document.querySelector(`input[name="${esc.id}${i}"]:checked`);
+    if(!sel){ faltan.push(esc.id+i); return; }
+    let v=parseInt(sel.value);
+    if(esc.reverse && esc.reverse.includes(i)) v=(esc.opciones.length-1)-v;
+    total+=v;
+  });
   return {total,faltan};
 }
 
-function nivelPHQ(s){
-  if(s<=4) return {t:"Mínima o ausente",c:"var(--ok)",p:s/27};
-  if(s<=9) return {t:"Leve",c:"var(--leve)",p:s/27};
-  if(s<=14) return {t:"Moderada",c:"var(--mod)",p:s/27};
-  if(s<=19) return {t:"Moderadamente grave",c:"var(--alto)",p:s/27};
-  return {t:"Grave",c:"var(--grave)",p:s/27};
-}
-function nivelGAD(s){
-  if(s<=4) return {t:"Mínima",c:"var(--ok)",p:s/21};
-  if(s<=9) return {t:"Leve",c:"var(--leve)",p:s/21};
-  if(s<=14) return {t:"Moderada",c:"var(--mod)",p:s/21};
-  return {t:"Grave",c:"var(--grave)",p:s/21};
-}
-const FUNC=["No ha sido difícil","Un poco difícil","Muy difícil","Extremadamente difícil"];
-
 function calcular(){
-  const p=suma("p",9), g=suma("g",7);
-  const faltan=[...p.faltan,...g.faltan];
+  let faltan=[];
+  const res=ESCALAS.map(esc=>{ const s=sumaEscala(esc); faltan=faltan.concat(s.faltan); return {esc, total:s.total, n:esc.banda(s.total)}; });
   document.querySelectorAll(".q.falta").forEach(q=>q.classList.remove("falta"));
   if(faltan.length){
     faltan.forEach(id=>document.getElementById("q-"+id)?.classList.add("falta"));
@@ -241,45 +286,54 @@ function calcular(){
     alert("Faltan "+faltan.length+" pregunta(s) por responder (resaltadas en rosado).");
     return;
   }
-  const np=nivelPHQ(p.total), ng=nivelGAD(g.total);
-  const funcSel=document.querySelector('input[name="func"]:checked');
-  const func = funcSel? FUNC[parseInt(funcSel.value)] : "No indicado";
+
+  // panel de resultados
+  const rows=document.getElementById("rows");
+  rows.innerHTML=res.map(r=>
+    `<div class="score-row">
+       <div><div class="score-lbl">${r.esc.lbl}</div><div class="barra"><i style="width:${Math.round(r.n.p*100)}%;background:${r.n.c}"></i></div></div>
+       <div style="text-align:right"><div class="score-num">${r.total}/${r.esc.max}</div><span class="pill" style="background:${r.n.c}">${r.n.t}</span></div>
+     </div>`).join("");
+
+  // datos rápidos
+  const R={}; res.forEach(r=>R[r.esc.id]=r);
   const item9=parseInt(document.querySelector('input[name="p8"]:checked').value);
+  const funcSel=document.querySelector('input[name="func"]:checked');
+  const func=funcSel?FUNC[parseInt(funcSel.value)]:"No indicado";
+  const pclAlto=R.t.total>=33;
 
-  // panel
-  document.getElementById("num-phq").textContent=p.total+"/27";
-  document.getElementById("num-gad").textContent=g.total+"/21";
-  const pillP=document.getElementById("pill-phq"); pillP.textContent=np.t; pillP.style.background=np.c;
-  const pillG=document.getElementById("pill-gad"); pillG.textContent=ng.t; pillG.style.background=ng.c;
-  const barP=document.getElementById("bar-phq"); barP.style.width=Math.round(np.p*100)+"%"; barP.style.background=np.c;
-  const barG=document.getElementById("bar-gad"); barG.style.width=Math.round(ng.p*100)+"%"; barG.style.background=ng.c;
+  // alertas
+  const flag=document.getElementById("flag"); let avisos=[];
+  if(item9>0) avisos.push("La paciente marcó el <b>ítem 9 del PHQ-9</b> (pensamientos de muerte o de hacerse daño). Se recomienda valoración de riesgo suicida. Línea 113, opción 5 (salud mental, Perú). Emergencias: 106.");
+  if(pclAlto) avisos.push("El <b>PCL-5</b> alcanza o supera el punto de corte (≥33) para un posible cuadro de estrés postraumático; requiere confirmación clínica y una experiencia traumática identificada.");
+  if(avisos.length){ flag.style.display="block"; flag.innerHTML="<b>Atención clínica:</b><br>• "+avisos.join("<br>• "); }
+  else flag.style.display="none";
 
-  const flag=document.getElementById("flag");
-  if(item9>0){
-    flag.style.display="block";
-    flag.innerHTML="<b>Atención clínica:</b> la paciente marcó el ítem 9 (pensamientos de muerte o de hacerse daño). "+
-      "Se recomienda realizar valoración de riesgo suicida. Línea de ayuda en Perú: <b>113, opción 5</b> (salud mental). Emergencias: 106.";
-  } else flag.style.display="none";
-
-  // texto informe
+  // bloque para el informe
   const nombre=document.getElementById("nombre").value||"[Nombre de la paciente]";
   const fecha=document.getElementById("fecha").value||"[fecha]";
   const obs=document.getElementById("obs").value.trim();
+  const pclCorte = pclAlto? "igual o superior al punto de corte (≥33) para posible TEPT (a confirmar clínicamente)"
+                          : "por debajo del punto de corte (≥33) para posible TEPT";
   let out=
 `INSTRUMENTOS APLICADOS
 - PHQ-9 (Cuestionario de Salud del Paciente): tamizaje de sintomatología depresiva.
 - GAD-7 (Escala de Ansiedad Generalizada): tamizaje de sintomatología ansiosa.
+- ISI (Índice de Gravedad del Insomnio): evaluación del insomnio.
+- PSS-10 (Escala de Estrés Percibido): nivel de estrés percibido.
+- PCL-5 (Lista de Verificación de TEPT para el DSM-5): tamizaje de estrés postraumático.
 
 RESULTADOS  (${nombre} — ${fecha})
-- PHQ-9 (depresión): ${p.total}/27  →  severidad ${np.t.toLowerCase()}.
-- GAD-7 (ansiedad): ${g.total}/21  →  severidad ${ng.t.toLowerCase()}.
-- Repercusión funcional referida: ${func}.`;
-  if(item9>0){
-    out+=`\n- Ítem 9 del PHQ-9 (ideación de muerte/autolesión): PRESENTE (puntaje ${item9}). Se realiza/indica valoración de riesgo.`;
-  }
+- PHQ-9 (depresión): ${R.p.total}/27  →  severidad ${R.p.n.t.toLowerCase()}.
+- GAD-7 (ansiedad): ${R.g.total}/21  →  severidad ${R.g.n.t.toLowerCase()}.
+- ISI (insomnio): ${R.s.total}/28  →  ${R.s.n.t.toLowerCase()}.
+- PSS-10 (estrés percibido): ${R.e.total}/40  →  nivel ${R.e.n.t.toLowerCase()}.
+- PCL-5 (estrés postraumático): ${R.t.total}/80  →  ${pclCorte}.
+- Repercusión funcional referida (PHQ-9): ${func}.`;
+  if(item9>0) out+=`\n- Ítem 9 del PHQ-9 (ideación de muerte/autolesión): PRESENTE (puntaje ${item9}). Se realiza/indica valoración de riesgo.`;
   out+=`\n\nINTERPRETACIÓN (sugerida — ajústela según criterio clínico)
-Los puntajes obtenidos son compatibles con sintomatología depresiva de intensidad ${np.t.toLowerCase()} y ansiosa de intensidad ${ng.t.toLowerCase()}, con una repercusión funcional referida como "${func.toLowerCase()}". Estos hallazgos, junto con la entrevista y la observación clínica, sustentan la necesidad de acompañamiento psicológico y las consideraciones académicas señaladas en el presente informe.`;
-  if(obs){ out+=`\n\nREFERIDO POR LA PACIENTE (textual)\n"${obs}"`; }
+Los puntajes obtenidos son compatibles con sintomatología depresiva de intensidad ${R.p.n.t.toLowerCase()} y ansiosa de intensidad ${R.g.n.t.toLowerCase()}. En la evaluación del sueño se obtiene ${R.s.n.t.toLowerCase()} (ISI ${R.s.total}/28) y un estrés percibido de nivel ${R.e.n.t.toLowerCase()} (PSS-10 ${R.e.total}/40). En el tamizaje de estrés postraumático obtiene ${R.t.total}/80 en el PCL-5, ${pclCorte}. La repercusión funcional referida es "${func.toLowerCase()}". Estos hallazgos, junto con la entrevista y la observación clínica, sustentan la necesidad de acompañamiento psicológico y las consideraciones académicas señaladas en el presente informe.`;
+  if(obs) out+=`\n\nREFERIDO POR LA PACIENTE (textual)\n"${obs}"`;
 
   document.getElementById("salida").value=out;
   document.getElementById("resultados").style.display="block";
