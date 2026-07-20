@@ -12,24 +12,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 
-<!-- ═══════════════ META PIXEL (opcional pero recomendado para pauta) ═══════════════
-Para que Meta optimice la campaña con eventos reales:
-1. En Business Manager → Orígenes de datos → crea/copia tu ID de píxel.
-2. Descomenta este bloque y reemplaza TU_PIXEL_ID (aparece 2 veces).
-La página ya dispara: PageView, TestIniciado, TestCompletado (con nivel) y Lead (clic en WhatsApp).
-
+<!-- Meta Pixel "NEURA web" (conjunto de datos 1040754105116381).
+     Eventos: PageView, TestIniciado, TestCompletado y Lead (clic a WhatsApp).
+     Por privacidad NO se envía nivel ni puntaje de nadie — solo eventos genéricos. -->
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
 n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
 document,'script','https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', 'TU_PIXEL_ID');
+fbq('init', '1040754105116381');
 fbq('track', 'PageView');
 </script>
 <noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=TU_PIXEL_ID&ev=PageView&noscript=1"/></noscript>
-═══════════════════════════════════════════════════════════════════════════════ -->
+src="https://www.facebook.com/tr?id=1040754105116381&ev=PageView&noscript=1"/></noscript>
 
 <style>
   :root{
@@ -258,7 +254,7 @@ function resultados(){
   const total = resp.reduce((a,b)=>a+b,0);
   const n = NIVELES.find(x=>total<=x.max);
   $("prog").style.width="100%";
-  evento("TestCompletado",{nivel:n.nombre,puntaje:total});
+  evento("TestCompletado"); // sin nivel/puntaje: nada clínico sale hacia Meta
 
   $("r-score").innerHTML = `${total}<small>/21</small>`;
   const arc=$("g-arc");
